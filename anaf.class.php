@@ -9,12 +9,12 @@ class myAnaf {
 	private $status_url;
 	private $download_url;
 	private $ubi_file_path;
-	$this->ubi_file_path=$ubi_file_path;
 
 	function __construct($client_idi,$client_secreti,$redirect_urii){
 		$this->client_id=$client_idi;
 		$this->client_secret=$client_secreti;
 		$this->redirect_uri=$redirect_urii;
+		$this->ubi_file_path=$ubi_file_path;
 		$this->authorize_url='https://logincert.anaf.ro/anaf-oauth2/v1/authorize';
 		$this->token_url='https://logincert.anaf.ro/anaf-oauth2/v1/token';
 		//TEST URL - CHANGE IT IN PRODUCTION
