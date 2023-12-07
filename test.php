@@ -6,9 +6,9 @@
 $site_client_id='XXXXXXXXXXXXXXXXXXXXXXXXXXXXXx';
 $site_client_secret='XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX';
 $site_redirect_uri='https://example.com';
-
+$filepath_UBI='/path/to/xml_file.xml';
 include "anaf.class.php";
-$anaf=new myAnaf($site_client_id,$site_client_secret,$site_redirect_uri);
+$anaf=new myAnaf($site_client_id,$site_client_secret,$site_redirect_uri,$filepath_UBI);
 
 //GET TOKEN
 $code=$_GET['code'];
@@ -28,10 +28,16 @@ if (isset($_GET['op']) && $_GET['op']=="refreshtoken"){
 	$refresh_token=$retval['refresh_token'];
 	//SAVE TOKEN HERE
 }
+//CREATE INVOICE - GENERATE XML INVOICE UBI AND SAVE
+$factura_data=array();
+$fact_data[0]['numar_factura']='ABC 001';
+$fact_data[0]['data_factura']='12.11.2023';
+//etc
+$anaf->CreateUBI($factura_data);
+
 //UPLOAD INVOICE	
 if (isset($_GET['op']) && $_GET['op']=="uploadfact"){
-	//STEP 1 - GENERATE XML INVOICE UBI AND SAVE
-	$fname=$_GET['fname']; //FILENAME OF XML
+	$fname=$filepath_UBI; //FILENAME OF XML
 	//OPEN FILE, READ DATA
 	$fullfile=$fname;
 	$file = fopen($fullfile, "r");
