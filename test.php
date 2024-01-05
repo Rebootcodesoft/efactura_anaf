@@ -52,16 +52,54 @@ $id_download= $retval['id'];
 //DOWNLOAD ERROR
 $datafile=$anaf->downloadUBIAnaf($token,$id_download);
 //SAVE DATA IN FILE
-$fp = fopen($global_dir.'ubl/'.$id_descarcare.'.zip', 'w');
+$fp = fopen($id_descarcare.'.zip', 'w');
 fwrite($fp, $datafile);
 fclose($fp);
 //UNZIP FILE
 $zip = new ZipArchive;
-$res = $zip->open($global_dir.'ubl/'.$id_descarcare.'.zip');
+$res = $zip->open($id_descarcare.'.zip');
 if ($res === TRUE) {
-    $zip->extractTo($global_dir.'ubl/');
+    $zip->extractTo('ubl/');
     $zip->close();
 }
 //READ ERROR FROM FILE
-$error = file_get_contents($global_dir.'ubl/'.$subl_id.'.xml');
+$error = file_get_contents($subl_id.'.xml');
+//get last anaf messages
+$retval=$anaf->GetLastmsgAnaf($token,'YOUR-cif');
+    foreach ($retval as $a=>$b){
+        foreach ($b as $xa=>$xb){
+			$id_solicitare=$xb->id_solicitare;
+			$id_intern=$xb->id;
+			$detalii=$xb->detalii;
+			$tip=$xb->tip;
+			if ($xb->tip=="FACTURA PRIMITA"){
+				//daca am primit noi o factura
+				$datafile=$anaf->downloadUBIAnaf($token,$id_intern);
+				$fp = fopen($id_intern.'.zip', 'w');
+				fwrite($fp, $datafile);
+				fclose($fp);
+				//unpack file?
+				$zip = new ZipArchive;
+				$res = $zip->open($id_intern.'.zip');
+				if ($res === TRUE) {
+				  $zip->extractTo('ubl/');
+				  $zip->close();
+				}
+				$fact = file_get_contents($id_solicitare.'.xml');
+				//download pdf
+				$fullfile=$id_solicitare.'.xml';
+				$file = fopen($fullfile, "r");
+				$data = fread($file, filesize($fullfile));
+				fclose($file);
+				$retval_pdf=$anaf->ConvertXmlToPdf($data);
+				$fp = fopen($id_solicitare.'.pdf', 'w');
+				fwrite($fp, $retval_pdf);
+				fclose($fp);
+
+			}
+
+            
+        }
+        
+    }
 ?>

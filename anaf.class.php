@@ -9,6 +9,8 @@ class myAnaf {
 	private $status_url;
 	private $download_url;
 	private $ubi_file_path;
+	private $xmltopdf_url;
+	private $mess_url;
 
 	function __construct($client_idi,$client_secreti,$redirect_urii){
 		$this->client_id=$client_idi;
@@ -21,6 +23,8 @@ class myAnaf {
 		$this->upload_url='https://api.anaf.ro/test/FCTEL/rest/upload?standard=UBL&cif=';
 		$this->status_url='https://api.anaf.ro/test/FCTEL/rest/stareMesaj?id_incarcare=';
 		$this->download_url='https://api.anaf.ro/test/FCTEL/rest/descarcare?id=';
+		$this->xmltopdf_url='https://webservicesp.anaf.ro/prod/FCTEL/rest/transformare/FACT1/DA';
+		$this->mess_url='https://api.anaf.ro/prod/FCTEL/rest/listaMesajeFactura?zile=5&cif=';
 	}
 	function AuthorizeAnaf(){
 		$url = $this->authorize_url;
@@ -123,6 +127,37 @@ class myAnaf {
 		$ch = curl_init();
 		curl_setopt($ch, CURLOPT_URL,$url);
 		curl_setopt($ch, CURLOPT_POST, 0);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+		curl_setopt($ch, CURLOPT_HTTPHEADER, $headr);
+		$server_output = curl_exec($ch);
+		curl_close ($ch);
+		return $server_output;
+	}
+	function GetLastmsgAnaf($token,$cif){
+		$retval=array();
+		$url = $this->mess_url.$cif;
+		$headr = array();
+		$headr[] = 'Authorization: Bearer '.$token;
+		$headr[] = 'Content-Type: text/plain';
+		$ch = curl_init();
+		curl_setopt($ch, CURLOPT_URL,$url);
+		curl_setopt($ch, CURLOPT_POST, 0);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+		curl_setopt($ch, CURLOPT_HTTPHEADER, $headr);
+		$server_output = curl_exec($ch);
+		curl_close ($ch);
+		$arr = json_decode($server_output);
+		return $arr;
+	}
+	function ConvertXmlToPdf($xml){
+		$url = $this->xmltopdf_url;
+		$headr = array();
+		$headr[] = 'Authorization: Bearer '.$token;
+		$headr[] = 'Content-Type: text/plain';
+		$ch = curl_init();
+		curl_setopt($ch, CURLOPT_URL,$url);
+		curl_setopt($ch, CURLOPT_POST, 0);
+		curl_setopt($ch, CURLOPT_POSTFIELDS,$xml); 
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 		curl_setopt($ch, CURLOPT_HTTPHEADER, $headr);
 		$server_output = curl_exec($ch);

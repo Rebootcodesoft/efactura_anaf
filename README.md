@@ -8,3 +8,8 @@ https://static.anaf.ro/static/10/Anaf/Informatii_R/API/Oauth_procedura_inregistr
 Dupa inregistrare se poate obtine variabilele site_client_id si site_client_secret.
 
 Generare xml UBI - trebuie modificat, personalizat, aceasta varianta este pentru firme neplatitori de TVA.
+
+Update ianuarie 2024
+- get mesages from Anaf
+- vizualizare e-facturi primite
+- generare pdf din e-factura primita
