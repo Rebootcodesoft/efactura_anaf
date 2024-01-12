@@ -19,10 +19,15 @@ class myAnaf {
 		$this->ubi_file_path=$ubi_file_path;
 		$this->authorize_url='https://logincert.anaf.ro/anaf-oauth2/v1/authorize';
 		$this->token_url='https://logincert.anaf.ro/anaf-oauth2/v1/token';
-		//TEST URL - CHANGE IT IN PRODUCTION
+		//TEST URL - 
 		$this->upload_url='https://api.anaf.ro/test/FCTEL/rest/upload?standard=UBL&cif=';
 		$this->status_url='https://api.anaf.ro/test/FCTEL/rest/stareMesaj?id_incarcare=';
 		$this->download_url='https://api.anaf.ro/test/FCTEL/rest/descarcare?id=';
+		//PROD URL
+		$this->upload_url='https://api.anaf.ro/prod/FCTEL/rest/upload?standard=UBL&cif=';
+		$this->status_url='https://api.anaf.ro/prod/FCTEL/rest/stareMesaj?id_incarcare=';
+		$this->download_url='https://api.anaf.ro/prod/FCTEL/rest/descarcare?id=';
+		
 		$this->xmltopdf_url='https://webservicesp.anaf.ro/prod/FCTEL/rest/transformare/FACT1/DA';
 		$this->mess_url='https://api.anaf.ro/prod/FCTEL/rest/listaMesajeFactura?zile=5&cif=';
 	}
