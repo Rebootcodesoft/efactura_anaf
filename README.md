@@ -9,6 +9,11 @@ Dupa inregistrare se poate obtine variabilele site_client_id si site_client_secr
 
 Generare xml UBI - trebuie modificat, personalizat, aceasta varianta este pentru firme neplatitori de TVA.
 
+Update februarie 2024
+Adaugat: ublparser.php
+Am adaugat un UBL parser, creat pe baza: https://github.com/ahmeti/ubl-parser-php/tree/master
+Am facut niste modificari pentru e-factura.
+
 Update ianuarie 2024
 - get mesages from Anaf
 - vizualizare e-facturi primite
