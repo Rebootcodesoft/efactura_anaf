@@ -8,28 +8,33 @@ class myAnaf {
 	private $upload_url;
 	private $status_url;
 	private $download_url;
+	private $upload_url_test;
+	private $status_url_test;
+	private $download_url_test;
 	private $ubi_file_path;
 	private $xmltopdf_url;
 	private $mess_url;
+	private $my_vat_number;
 
-	function __construct($client_idi,$client_secreti,$redirect_urii){
+	function __construct($client_idi,$client_secreti,$redirect_urii,$filepath_UBI,$my_vat_number){
 		$this->client_id=$client_idi;
 		$this->client_secret=$client_secreti;
 		$this->redirect_uri=$redirect_urii;
-		$this->ubi_file_path=$ubi_file_path;
+		$this->ubi_file_path=$filepath_UBI;
+		$this->my_vat_number=$my_vat_number;
 		$this->authorize_url='https://logincert.anaf.ro/anaf-oauth2/v1/authorize';
 		$this->token_url='https://logincert.anaf.ro/anaf-oauth2/v1/token';
 		//TEST URL - 
-		$this->upload_url='https://api.anaf.ro/test/FCTEL/rest/upload?standard=UBL&cif=';
-		$this->status_url='https://api.anaf.ro/test/FCTEL/rest/stareMesaj?id_incarcare=';
-		$this->download_url='https://api.anaf.ro/test/FCTEL/rest/descarcare?id=';
+		$this->upload_url_test='https://api.anaf.ro/test/FCTEL/rest/upload?standard=UBL&cif='.$this->my_vat_number;
+		$this->status_url_test='https://api.anaf.ro/test/FCTEL/rest/stareMesaj?id_incarcare=';
+		$this->download_url_test='https://api.anaf.ro/test/FCTEL/rest/descarcare?id=';
 		//PROD URL
-		$this->upload_url='https://api.anaf.ro/prod/FCTEL/rest/upload?standard=UBL&cif=';
+		$this->upload_url='https://api.anaf.ro/prod/FCTEL/rest/upload?standard=UBL&cif='.$this->my_vat_number;
 		$this->status_url='https://api.anaf.ro/prod/FCTEL/rest/stareMesaj?id_incarcare=';
 		$this->download_url='https://api.anaf.ro/prod/FCTEL/rest/descarcare?id=';
 		
 		$this->xmltopdf_url='https://webservicesp.anaf.ro/prod/FCTEL/rest/transformare/FACT1/DA';
-		$this->mess_url='https://api.anaf.ro/prod/FCTEL/rest/listaMesajeFactura?zile=5&cif=';
+		$this->mess_url='https://api.anaf.ro/prod/FCTEL/rest/listaMesajeFactura?zile=5&cif='.$this->my_vat_number;
 	}
 	function AuthorizeAnaf(){
 		$url = $this->authorize_url;
@@ -83,8 +88,8 @@ class myAnaf {
 		$retval['refresh_token']=$arr["refresh_token"];
 		return $retval;
 	}
-	function uploadUBIAnaf($token,$cif,$xml){
-		$url = $this->upload_url.$cif;
+	function uploadUBIAnaf($token,$xml){
+		$url = $this->upload_url;
 		$headr = array();
 		$headr[] = 'Authorization: Bearer '.$token;
 		$headr[] = 'Content-Type: text/plain';
@@ -138,9 +143,9 @@ class myAnaf {
 		curl_close ($ch);
 		return $server_output;
 	}
-	function GetLastmsgAnaf($token,$cif){
+	function GetLastmsgAnaf($token){
 		$retval=array();
-		$url = $this->mess_url.$cif;
+		$url = $this->mess_url;
 		$headr = array();
 		$headr[] = 'Authorization: Bearer '.$token;
 		$headr[] = 'Content-Type: text/plain';
@@ -169,8 +174,18 @@ class myAnaf {
 		curl_close ($ch);
 		return $server_output;
 	}
-	function CreateUBI($fact_data){
-		//model creare UBI pentru factura cu TVA 0
+	function CreateUBI($fact_data,$is_firma_tva,$total_fara_tva,$total_tva,$total_cu_tva,$tva){
+		//model creare UBI pentru factura
+		if ($is_firma_tva){
+			if ($total_tva > 0){
+				$taxcateg='S';
+			}else{
+				$taxcateg='Z';
+			}
+		}else{
+			$taxcateg='O';
+		}
+
 		$x=new XMLWriter();
 		$filename=$this->ubi_file_path;
 		$x->openURI($filename);
@@ -259,7 +274,7 @@ class myAnaf {
 				'currencyID',
 				'RON'
 			);
-			$x->text('0.00');
+			$x->text($total_tva);
 			$x->endElement();
 			$x->startElement('cac:TaxSubtotal');
 				$x->startElement('cbc:TaxableAmount');
@@ -267,19 +282,21 @@ class myAnaf {
 					'currencyID',
 					'RON'
 				);
-				$x->text($fact_data[0]['total']);
+				$x->text($total_fara_tva);
 				$x->endElement();
 				$x->startElement('cbc:TaxAmount');
 				$x->writeAttribute(
 					'currencyID',
 					'RON'
 				);
-				$x->text('0.00');
+				$x->text($total_tva);
 				$x->endElement();
 				$x->startElement('cac:TaxCategory');
-					$x->startElement('cbc:ID');$x->text('O');$x->endElement();
-						$x->startElement('cbc:Percent');$x->text('0.00');$x->endElement();
-			  $x->startElement('cbc:TaxExemptionReasonCode');$x->text('VATEX-EU-O');$x->endElement();
+					$x->startElement('cbc:ID');$x->text($taxcateg);$x->endElement();
+						$x->startElement('cbc:Percent');$x->text($tva);$x->endElement();
+						if (!$is_firma_tva){
+			  			$x->startElement('cbc:TaxExemptionReasonCode');$x->text('VATEX-EU-O');$x->endElement();
+						}
 					$x->startElement('cac:TaxScheme');
 						$x->startElement('cbc:ID');$x->text('VAT');$x->endElement();
 					$x->endElement();
@@ -292,28 +309,28 @@ class myAnaf {
 				'currencyID',
 				'RON'
 			);
-			$x->text($totals);
+			$x->text($total_fara_tva);
 			$x->endElement();
 			$x->startElement('cbc:TaxExclusiveAmount');
 			$x->writeAttribute(
 				'currencyID',
 				'RON'
 			);
-			$x->text($totals);
+			$x->text($total_fara_tva);
 			$x->endElement();
 			$x->startElement('cbc:TaxInclusiveAmount');
 			$x->writeAttribute(
 				'currencyID',
 				'RON'
 			);
-			$x->text($totals);
+			$x->text($total_cu_tva);
 			$x->endElement();
 			$x->startElement('cbc:PayableAmount');
 			$x->writeAttribute(
 				'currencyID',
 				'RON'
 			);
-			$x->text($totals);
+			$x->text($total_cu_tva);
 			$x->endElement();
 		$x->endElement();
 		
@@ -340,7 +357,10 @@ class myAnaf {
 				$x->startElement('cbc:Name');$x->text($fact_data[0]['factura_randuri'][$i]['denumire']);$x->endElement();
 		
 				$x->startElement('cac:ClassifiedTaxCategory');
-					$x->startElement('cbc:ID');$x->text('O');$x->endElement();
+					$x->startElement('cbc:ID');$x->text($taxcateg);$x->endElement();
+					if ($is_firma_tva){
+					$x->startElement('cbc:Percent');$x->text($tva);$x->endElement();
+					}
 					$x->startElement('cac:TaxScheme');
 						$x->startElement('cbc:ID');$x->text('VAT');$x->endElement();
 					$x->endElement();

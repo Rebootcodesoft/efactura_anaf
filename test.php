@@ -7,8 +7,9 @@ $site_client_id='XXXXXXXXXXXXXXXXXXXXXXXXXXXXXx';
 $site_client_secret='XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX';
 $site_redirect_uri='https://example.com';
 $filepath_UBI='/path/to/xml_file.xml';
+$cif='RO111111';
 include "anaf.class.php";
-$anaf=new myAnaf($site_client_id,$site_client_secret,$site_redirect_uri,$filepath_UBI);
+$anaf=new myAnaf($site_client_id,$site_client_secret,$site_redirect_uri,$filepath_UBI,$cif);
 
 //GET TOKEN
 $code=$_GET['code'];
@@ -33,7 +34,7 @@ $factura_data=array();
 $fact_data[0]['numar_factura']='ABC 001';
 $fact_data[0]['data_factura']='12.11.2023';
 //etc
-$anaf->CreateUBI($factura_data);
+$anaf->CreateUBI($factura_data,$is_firma_tva,$total_fara_tva,$total_tva,$total_cu_tva,$tva);
 
 //UPLOAD INVOICE	
 if (isset($_GET['op']) && $_GET['op']=="uploadfact"){
@@ -43,7 +44,7 @@ if (isset($_GET['op']) && $_GET['op']=="uploadfact"){
 	$file = fopen($fullfile, "r");
 	$data = fread($file, filesize($fullfile));
 	fclose($file);
-	$invoice_id=$anaf->uploadUBIAnaf($token,'YOUR-cif',$data); //INVOICE ID
+	$invoice_id=$anaf->uploadUBIAnaf($token,$data); //INVOICE ID
 }
 //GET STATUS 
 $retval=$anaf->statusUBIAnaf($token,$invoice_id);
@@ -65,7 +66,7 @@ if ($res === TRUE) {
 //READ ERROR FROM FILE
 $error = file_get_contents($subl_id.'.xml');
 //get last anaf messages
-$retval=$anaf->GetLastmsgAnaf($token,'YOUR-cif');
+$retval=$anaf->GetLastmsgAnaf($token);
     foreach ($retval as $a=>$b){
         foreach ($b as $xa=>$xb){
 			$id_solicitare=$xb->id_solicitare;
@@ -102,4 +103,11 @@ $retval=$anaf->GetLastmsgAnaf($token,'YOUR-cif');
         }
         
     }
+//UBL PARSER
+include 'ublparser.php';
+$xml = file_get_contents('Path of Invoice UBL (XML) File');
+$parser = new UBLParser;
+$parser->set($xml);
+$result = $parser->get();
+print_r($result);
 ?>
