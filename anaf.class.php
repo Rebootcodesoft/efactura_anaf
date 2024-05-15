@@ -8,31 +8,30 @@ class myAnaf {
 	private $upload_url;
 	private $status_url;
 	private $download_url;
-	private $upload_url_test;
-	private $status_url_test;
-	private $download_url_test;
 	private $ubi_file_path;
 	private $xmltopdf_url;
 	private $mess_url;
 	private $my_vat_number;
+	private $testmode;
 
-	function __construct($client_idi,$client_secreti,$redirect_urii,$filepath_UBI,$my_vat_number){
+	function __construct($client_idi,$client_secreti,$redirect_urii,$filepath_UBI,$my_vat_number,$testmode){
 		$this->client_id=$client_idi;
 		$this->client_secret=$client_secreti;
 		$this->redirect_uri=$redirect_urii;
 		$this->ubi_file_path=$filepath_UBI;
 		$this->my_vat_number=$my_vat_number;
+		$this->testmode=$testmode;
 		$this->authorize_url='https://logincert.anaf.ro/anaf-oauth2/v1/authorize';
 		$this->token_url='https://logincert.anaf.ro/anaf-oauth2/v1/token';
-		//TEST URL - 
-		$this->upload_url_test='https://api.anaf.ro/test/FCTEL/rest/upload?standard=UBL&cif='.$this->my_vat_number;
-		$this->status_url_test='https://api.anaf.ro/test/FCTEL/rest/stareMesaj?id_incarcare=';
-		$this->download_url_test='https://api.anaf.ro/test/FCTEL/rest/descarcare?id=';
-		//PROD URL
+		if ($this->testmode){
+		$this->upload_url='https://api.anaf.ro/test/FCTEL/rest/upload?standard=UBL&cif='.$this->my_vat_number;
+		$this->status_url='https://api.anaf.ro/test/FCTEL/rest/stareMesaj?id_incarcare=';
+		$this->download_url='https://api.anaf.ro/test/FCTEL/rest/descarcare?id=';
+		}else{
 		$this->upload_url='https://api.anaf.ro/prod/FCTEL/rest/upload?standard=UBL&cif='.$this->my_vat_number;
 		$this->status_url='https://api.anaf.ro/prod/FCTEL/rest/stareMesaj?id_incarcare=';
 		$this->download_url='https://api.anaf.ro/prod/FCTEL/rest/descarcare?id=';
-		
+		}
 		$this->xmltopdf_url='https://webservicesp.anaf.ro/prod/FCTEL/rest/transformare/FACT1/DA';
 		$this->mess_url='https://api.anaf.ro/prod/FCTEL/rest/listaMesajeFactura?zile=5&cif='.$this->my_vat_number;
 	}
