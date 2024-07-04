@@ -41,23 +41,17 @@ class myAnaf {
 		$url .='&client_secret='.$this->client_secret;
 		$url .='&response_type=code';
 		$url .='&redirect_uri='.$this->redirect_uri;
+		$url .='&token_content_type=jwt';
 		header('Location: '.$url);
 	}
 	function getTokenAnaf($code){
 		$retval=array();
 		$url = $this->token_url;
-		$fields = [
-			'client_id'      => $this->client_id,
-			'client_secret' => $this->client_secret,
-			'code'         => $code,
-			'redirect_uri'	=> $this->redirect_uri,
-			'grant_type' => 'authorization_code'
-		];
-		$fields_string = http_build_query($fields);
+		$test = "grant_type=authorization_code&code=".$code."&client_id=".$this->client_id."&client_secret=".$this->client_secret."&redirect_uri=".$this->redirect_uri."&token_content_type=jwt";
 		$ch = curl_init();
 		curl_setopt($ch,CURLOPT_URL, $url);
 		curl_setopt($ch,CURLOPT_POST, true);
-		curl_setopt($ch,CURLOPT_POSTFIELDS, $fields_string);
+		curl_setopt($ch,CURLOPT_POSTFIELDS, $test);
 		curl_setopt($ch,CURLOPT_RETURNTRANSFER, true); 
 		$jsonobj = curl_exec($ch);
 		$arr = json_decode($jsonobj, true);
@@ -68,18 +62,11 @@ class myAnaf {
 	function refreshTokenTokenAnaf($refresh_token){
 		$retval=array();
 		$url = $this->token_url;
-		$fields = [
-			'client_id'      => $this->client_id,
-			'client_secret' => $this->client_secret,
-			'refresh_token' => $refresh_token,
-			'redirect_uri'	=> $this->redirect_uri,
-			'grant_type' => 'refresh_token'
-		];
-		$fields_string = http_build_query($fields);
+		$test = "grant_type=refresh_token&client_id=".$this->client_id."&client_secret=".$this->client_secret."&redirect_uri=".$this->redirect_uri."&refresh_token=".$refresh_token."&token_content_type=jwt";
 		$ch = curl_init();
 		curl_setopt($ch,CURLOPT_URL, $url);
 		curl_setopt($ch,CURLOPT_POST, true);
-		curl_setopt($ch,CURLOPT_POSTFIELDS, $fields_string);
+		curl_setopt($ch,CURLOPT_POSTFIELDS, $test);
 		curl_setopt($ch,CURLOPT_RETURNTRANSFER, true); 
 		$jsonobj = curl_exec($ch);
 		$arr = json_decode($jsonobj, true);

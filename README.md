@@ -51,6 +51,9 @@ Mai multe exemple gasiti in fisierul test.php
 
 ### Update
 
+Update iulie 2024
+- generare token tip JWT (daca primiti eroarea 401 Unauthorized, trebuie sa generati un token nou)
+
 Update mai 2024
 - adaugare mod testare in anaf class.
 
